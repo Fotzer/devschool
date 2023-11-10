@@ -1,0 +1,84 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+// Devschool topic
+
+model Student {
+  id              Int                     @id @default(autoincrement())
+  telegram_tag    String                  @unique
+  direction       Direction               @relation(fields: [directionID], references: [id])
+  directionID     Int
+  submitted_works Submitted_work[]
+}
+
+
+model Homework {
+  id              Int                     @id @default(autoincrement())
+  title           String
+  content         String
+  directions      Homework_Direction[]
+  submitted_works Submitted_work[]
+}
+
+
+model Mentor {
+  id              Int                     @id @default(autoincrement())
+  telegram_tag    String                  @unique
+  direction       Direction               @relation(fields: [directionId], references: [id])
+  directionId     Int
+  works_to_check  Submitted_work[]
+  lector          Lector?
+}
+
+
+model Lector {
+  id              Int                     @id @default(autoincrement())
+  mentor          Mentor                  @relation(fields: [mentorId], references: [id])
+  mentorId        Int                     @unique
+  direction       Direction               @relation(fields: [directionId], references: [id])
+  directionId     Int                     @unique
+}
+
+
+//front, back or bots
+model Direction {
+  id              Int                     @id @default(autoincrement())
+  name            String
+  lector          Lector?
+  homeworks       Homework_Direction[]
+  mentors         Mentor[]
+  students        Student[]
+}
+
+
+model Submitted_work {
+  id              Int                     @id @default(autoincrement())
+  content         String
+  student         Student                 @relation(fields: [studentId], references: [id])
+  studentId       Int
+  homework        Homework                @relation(fields: [homeworkId], references: [id])
+  homeworkId      Int
+  mentor          Mentor                  @relation(fields: [mentorId], references: [id])
+  mentorId        Int
+  status          String
+  mark            Int
+}
+
+
+model Homework_Direction {
+  id              Int                     @id @default(autoincrement())
+  homework        Homework                @relation(fields: [homeworkId], references: [id])
+  homeworkId      Int
+  direction       Direction               @relation(fields: [directionId], references: [id])
+  directionId     Int
+}
