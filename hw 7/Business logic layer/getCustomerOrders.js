@@ -3,6 +3,16 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient({})
 
 async function getCustomerOrders(customerId) {
+    const customer = await prisma.customer.findUnique({
+        where: {id: customerId}
+    });
+    if(customer === null) {
+        const error = {};
+        error.status = 404;
+        error.message = "No such customer";
+        return [null, error];
+    }
+
     const data = {};
     data.orders = await prisma.order.findMany({
         where: {customerId: customerId}
@@ -27,12 +37,12 @@ async function getCustomerOrders(customerId) {
         }
 
 
-        record.totalСost = orderCost;
+        record.totalCost = orderCost;
     }
-    data.totalСost = totalCost;
+    data.totalCost = totalCost;
 
 
-    return data;
+    return [data, null];
 }
 
 export default getCustomerOrders;
